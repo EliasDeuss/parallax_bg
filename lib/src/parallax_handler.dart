@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:parallax_bg/src/parallax_item.dart';
-import 'package:flutter_sensors/flutter_sensors.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 enum Direction { LEFT, RIGHT, TOP, BOTTOM }
 
@@ -17,14 +17,14 @@ class ParallaxBackground extends StatefulWidget {
   ///
   final String backgroundImage;
   final List<ParallaxItem> foregroundChilds;
-  final Widget child;
+  final Widget? child;
   final bool reverse;
   final bool fallback;
 
   const ParallaxBackground(
-      {Key key,
-      @required this.backgroundImage,
-      @required this.foregroundChilds,
+      {Key? key,
+      required this.backgroundImage,
+      required this.foregroundChilds,
       this.child,
       this.reverse = false,
       this.fallback = false})
@@ -37,7 +37,7 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
   var _event = AccelerometerData(0, 0, 0);
   bool accelerometerAvailable = true;
 
-  StreamSubscription _accelSubscription;
+  late StreamSubscription<UserAccelerometerEvent> _accelerometer;
 
   @override
   void initState() {
@@ -46,19 +46,10 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
   }
 
   setupSensor() async {
-    accelerometerAvailable =
-        await SensorManager().isSensorAvailable(Sensors.ACCELEROMETER);
-
     if (accelerometerAvailable) {
-      final stream = await SensorManager().sensorUpdates(
-        sensorId: Sensors.ACCELEROMETER,
-        interval: Sensors.SENSOR_DELAY_GAME,
-      );
-
-      _accelSubscription = stream.listen((sensorEvent) {
+      _accelerometer = userAccelerometerEvents.listen((UserAccelerometerEvent event) {
         setState(() {
-          _event = AccelerometerData(
-              sensorEvent.data[0], sensorEvent.data[1], sensorEvent.data[2]);
+          _event = AccelerometerData(event.x, event.y, event.z);
         });
       });
 
@@ -95,7 +86,7 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
     );
     widgets = _generateForeground(widgets);
 
-    if (widget.child != null) widgets.add(widget.child);
+    if (widget.child != null) widgets.add(widget.child!);
     return widgets;
   }
 
@@ -170,7 +161,7 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
   @override
   void dispose() {
     super.dispose();
-    _accelSubscription.cancel();
+    _accelerometer.cancel();
   }
 }
 
