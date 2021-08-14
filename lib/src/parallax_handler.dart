@@ -37,7 +37,7 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
   var _event = AccelerometerData(0, 0, 0);
   bool accelerometerAvailable = true;
 
-  late StreamSubscription<UserAccelerometerEvent> _accelerometer;
+  late StreamSubscription<AccelerometerEvent> _accelerometer;
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
 
   setupSensor() async {
     if (accelerometerAvailable) {
-      _accelerometer = userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      _accelerometer = accelerometerEvents.listen((AccelerometerEvent event) {
         setState(() {
           _event = AccelerometerData(event.x, event.y, event.z);
         });
@@ -78,8 +78,7 @@ class _ParallaxBackgroundState extends State<ParallaxBackground> {
         child: Container(
           // constraints: BoxConstraints.expand(),
           decoration: BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage(widget.backgroundImage), fit: BoxFit.none),
+            image: DecorationImage(image: AssetImage(widget.backgroundImage), fit: BoxFit.fill),
           ),
         ),
       ),
